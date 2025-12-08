@@ -46,7 +46,8 @@ enum CmdType {
   T_CONTINUE,
   T_BREAK,
   T_SKIP,
-  T_LOOP
+  T_LOOP,
+  T_EXPR
   // ,
   // T_WHILE,
   // T_WI,
@@ -83,6 +84,7 @@ struct cmd {
     struct {} BREAK;
     struct {} SKIP;
     struct {struct cmd * init; struct cmd * body;} LOOP;
+    struct {struct expr * exp;} EXPR;
     // struct {struct expr * cond; struct cmd * body; } WHILE;
     // struct {struct expr * arg; } WI;
     // struct {struct expr * arg; } WC;
@@ -106,6 +108,7 @@ struct cmd * TContinue();
 struct cmd * TBreak();
 struct cmd * TSkip();
 struct cmd * TLoop(struct cmd * init, struct cmd * body);
+struct cmd * TExpr(struct expr * exp);
 // struct cmd * TWhile(struct expr * cond, struct cmd * body);
 // struct cmd * TWriteInt(struct expr * arg);
 // struct cmd * TWriteChar(struct expr * arg);

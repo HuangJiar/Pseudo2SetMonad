@@ -69,32 +69,6 @@ struct expr * TFun(char* name, struct expr_list * arg) {
   return res;
 }
 
-// struct expr * TDeref(struct expr * arg) {
-//   struct expr * res = new_expr_ptr();
-//   res -> t = T_DEREF;
-//   res -> d.DEREF.arg = arg;
-//   return res;
-// }
-
-// struct expr * TMalloc(struct expr * arg) {
-//   struct expr * res = new_expr_ptr();
-//   res -> t = T_MALLOC;
-//   res -> d.MALLOC.arg = arg;
-//   return res;
-// }
-
-// struct expr * TReadInt() {
-//   struct expr * res = new_expr_ptr();
-//   res -> t = T_RI;
-//   return res;
-// }
-
-// struct expr * TReadChar() {
-//   struct expr * res = new_expr_ptr();
-//   res -> t = T_RC;
-//   return res;
-// }
-
 struct cmd * TDecl(char * name) {
   struct cmd * res = new_cmd_ptr();
   res -> t = T_DECL;
@@ -153,34 +127,20 @@ struct cmd * TLoop(struct cmd * init, struct cmd * body) {
   return res;
 }
 
+struct cmd * TExpr(struct expr * exp) {
+  struct cmd * res = new_cmd_ptr();
+  res -> t = T_EXPR;
+  res -> d.EXPR.exp = exp;
+  return res;
+
+}
+
 struct expr_list * TExprList(struct expr * expr, struct expr_list * nxt) {
   struct expr_list * res = new_expr_list_ptr();
   res->exp = expr;
   res->nxt = nxt;
   return res;
 }
-
-// struct cmd * TWhile(struct expr * cond, struct cmd * body) {
-//   struct cmd * res = new_cmd_ptr();
-//   res -> t = T_WHILE;
-//   res -> d.WHILE.cond = cond;
-//   res -> d.WHILE.body = body;
-//   return res;
-// }
-
-// struct cmd * TWriteInt(struct expr * arg) {
-//   struct cmd * res = new_cmd_ptr();
-//   res -> t = T_WI;
-//   res -> d.WI.arg = arg;
-//   return res;
-// }
-
-// struct cmd * TWriteChar(struct expr * arg) {
-//   struct cmd * res = new_cmd_ptr();
-//   res -> t = T_WC;
-//   res -> d.WC.arg = arg;
-//   return res;
-// }
 
 void print_binop(enum BinOpType op) {
   switch (op) {
@@ -237,8 +197,6 @@ void print_unop(enum UnOpType op) {
   }
 }
 
-
-
 void print_expr(struct expr * e) {
   switch (e -> t) {
   case T_CONST:
@@ -269,7 +227,6 @@ void print_expr(struct expr * e) {
   }
 }
 
-
 void print_expr_list(struct expr_list * lst) {
   if (lst == NULL)
     return;
@@ -280,8 +237,6 @@ void print_expr_list(struct expr_list * lst) {
 
 
 void print_cmd(struct cmd * c) {
-  // puts("#");
-  // printf("%lld\n", c);
   switch (c -> t) {
   case T_DECL:
     printf("DECL(%s)", c -> d.DECL.name);
@@ -324,6 +279,10 @@ void print_cmd(struct cmd * c) {
     printf(",");
     print_cmd(c -> d.LOOP.body);
     printf(")");
+    break;
+  case T_EXPR:
+    print_expr(c -> d.EXPR.exp);
+    break;
   }
 }
 

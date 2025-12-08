@@ -40,6 +40,14 @@
     return TM_SKIP;
 }
 
+"true" {
+    return TM_TRUE;
+}
+
+"false" {
+    return TM_FALSE;
+}
+
 [_A-Za-z][_A-Za-z0-9]* {
     yylval.i = new_str(yytext, yyleng);
     return TM_IDENT;

@@ -22,6 +22,7 @@ void * none;
 %token <i> TM_IDENT
 %token <none> TM_LEFT_BRACE TM_RIGHT_BRACE
 %token <none> TM_LEFT_PAREN TM_RIGHT_PAREN
+%token <none> TM_TRUE TM_FALSE
 %token <none> TM_COLON
 %token <none> TM_COMMA
 %token <none> TM_CONTINUE
@@ -43,6 +44,7 @@ void * none;
 %type <c> NT_WHOLE
 %type <c> NT_CMD
 %type <c> NT_CMD_ 
+%type <c> NT_CMDS_
 // CMD WITH END
 %type <e> NT_EXPR_2
 %type <e> NT_EXPR
@@ -57,7 +59,7 @@ void * none;
 %left TM_MUL TM_DIV TM_MOD
 %left TM_NOT
 %left TM_LEFT_PAREN TM_RIGHT_PAREN
-%right TM_SEMICOL
+%left TM_SEMICOL
 %left TM_COLON
 
 %%
@@ -68,9 +70,14 @@ NT_WHOLE:
     $$ = ($1);
     root = $$;
   }
-| NT_CMD_
+| NT_CMDS_
   {
     $$ = ($1);
+    root = $$;
+  }
+| NT_CMDS_ NT_CMD
+  {
+    $$ = (TSeq($1, $2));
     root = $$;
   }
 ;
@@ -88,7 +95,7 @@ NT_CMD:
   {
     $$ = (TSkip());
   }
-|  TM_VAR TM_IDENT
+| TM_VAR TM_IDENT
   {
     $$ = (TDecl($2));
   }
@@ -96,7 +103,18 @@ NT_CMD:
   {
     $$ = (TAsgn($1,$3));
   }
-| NT_CMD_ NT_CMD %prec TM_SEMICOL
+| NT_EXPR 
+  {
+    $$ = (TExpr($1));
+  }
+;
+
+NT_CMDS_:
+  NT_CMD_
+  {
+    $$ = ($1);
+  }
+| NT_CMDS_ NT_CMD_ %prec TM_SEMICOL
   {
     $$ = (TSeq($1, $2));
   }
@@ -136,7 +154,7 @@ NT_EXPR_LIST:
   }
 | NT_EXPR TM_COMMA NT_EXPR_LIST
   {
-    $$ = (TExprList($1, $2));
+    $$ = (TExprList($1, $3));
   }
 ;
 
@@ -146,6 +164,14 @@ NT_EXPR_2:
   {
     $$ = (TConst($1));
   }
+| TM_TRUE 
+  {
+    $$ = (TConst(1));
+  }
+| TM_FALSE
+  {
+    $$ = (TConst(0));
+  }
 | TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN
   {
     $$ = ($2);
@@ -153,6 +179,10 @@ NT_EXPR_2:
 | TM_IDENT TM_LEFT_PAREN NT_EXPR_LIST TM_RIGHT_PAREN
   {
     $$ = (TFun($1, $3));
+  }
+| TM_IDENT TM_LEFT_PAREN TM_RIGHT_PAREN
+  {
+    $$ = (TFun($1, NULL));
   }
 | TM_IDENT
   {

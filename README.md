@@ -4,16 +4,19 @@ Tokens:
 
 - Operations + - * / % < <= == != > >= ! && ||
 - Assignment <-
-- Spacer ( ) : ;; ,
+- Spacer ( ) : ;; , { }
 - Natural Number
 - Identity
 - Reserved Words if else loop_init loop_body continue break skip
 
+
+I have add -g in Makefile. Remember of delete it while the project is handed in.
+
 TO DO LIST.
 
-- [ ] Design the grammer
-- [ ] Lexer
-- [ ] Parser
+- [x] Design the grammer
+- [x] Lexer
+- [x] Parser
 - [ ] Print to SetMonad
 - [ ] Write the documenet
 
