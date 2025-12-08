@@ -145,6 +145,14 @@ struct cmd * TSkip() {
   return res;
 }
 
+struct cmd * TLoop(struct cmd * init, struct cmd * body) {
+  struct cmd * res = new_cmd_ptr();
+  res -> t = T_LOOP;
+  res -> d.LOOP.init = init;
+  res -> d.LOOP.body = body;
+  return res;
+}
+
 struct expr_list * TExprList(struct expr * expr, struct expr_list * nxt) {
   struct expr_list * res = new_expr_list_ptr();
   res->exp = expr;

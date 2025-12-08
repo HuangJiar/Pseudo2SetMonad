@@ -56,6 +56,7 @@ void * none;
 %left TM_NOT
 %left TM_LEFT_PAREN TM_RIGHT_PAREN
 %right TM_SEMICOL
+%left TM_COLON
 
 %%
 
@@ -68,27 +69,7 @@ NT_WHOLE:
 ;
 
 NT_CMD:
-  TM_VAR TM_IDENT
-  {
-    $$ = (TDecl($2));
-  }
-| NT_EXPR TM_ASGNOP NT_EXPR
-  {
-    $$ = (TAsgn($1,$3));
-  }
-| NT_CMD TM_SEMICOL NT_CMD
-  {
-    $$ = (TSeq($1,$3));
-  }
-| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN TM_COLON NT_CMD TM_ELSE TM_COLON NT_CMD
-  {
-    $$ = (TIf($3,$6,$9));
-  }
-| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN TM_COLON NT_CMD
-  {
-    $$ = (TIf($3,$6,TSkip()));
-  }
-| TM_CONTINUE
+ TM_CONTINUE
   {
     $$ = (TContinue());
   }
@@ -100,9 +81,33 @@ NT_CMD:
   {
     $$ = (TSkip());
   }
+|  TM_VAR TM_IDENT
+  {
+    $$ = (TDecl($2));
+  }
+| NT_EXPR TM_ASGNOP NT_EXPR
+  {
+    $$ = (TAsgn($1,$3));
+  }
+| NT_CMD TM_SEMICOL NT_CMD
+  {
+    $$ = (TSeq($1,$3));
+  }
+| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN TM_COLON TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE TM_ELSE TM_COLON TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE
+  {
+    $$ = (TIf($3,$7,$12));
+  }
+| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN TM_COLON TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE
+  {
+    $$ = (TIf($3,$6,TSkip()));
+  }
 | NT_CMD TM_COLON
   {
     $$ = ($1);
+  }
+| TM_LOOP_INIT TM_COLON TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE TM_LOOP_BODY TM_COLON TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE
+  {
+    $$ = TLoop($4, $9);
   }
 ;
 

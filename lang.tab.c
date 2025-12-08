@@ -76,7 +76,7 @@
 	int yylex(void);
         struct cmd * root;
 
-#line 80 "parser.c"
+#line 80 "lang.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -107,10 +107,7 @@
 # define YYERROR_VERBOSE 0
 #endif
 
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_PARSER_H_INCLUDED
-# define YY_YY_PARSER_H_INCLUDED
+
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -180,7 +177,7 @@ struct expr * e;
 struct cmd * c;
 void * none;
 
-#line 184 "parser.c"
+#line 181 "lang.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -193,7 +190,7 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_PARSER_H_INCLUDED  */
+
 
 
 
@@ -1426,7 +1423,7 @@ yyreduce:
     (yyval.c) = ((yyvsp[0].c));
     root = (yyval.c);
   }
-#line 1430 "parser.c"
+#line 1427 "lang.tab.c"
     break;
 
   case 3:
@@ -1434,7 +1431,7 @@ yyreduce:
   {
     (yyval.c) = (TContinue());
   }
-#line 1438 "parser.c"
+#line 1435 "lang.tab.c"
     break;
 
   case 4:
@@ -1442,7 +1439,7 @@ yyreduce:
   {
     (yyval.c) = (TBreak());
   }
-#line 1446 "parser.c"
+#line 1443 "lang.tab.c"
     break;
 
   case 5:
@@ -1450,7 +1447,7 @@ yyreduce:
   {
     (yyval.c) = (TSkip());
   }
-#line 1454 "parser.c"
+#line 1451 "lang.tab.c"
     break;
 
   case 6:
@@ -1458,7 +1455,7 @@ yyreduce:
   {
     (yyval.c) = (TDecl((yyvsp[0].i)));
   }
-#line 1462 "parser.c"
+#line 1459 "lang.tab.c"
     break;
 
   case 7:
@@ -1466,7 +1463,7 @@ yyreduce:
   {
     (yyval.c) = (TAsgn((yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1470 "parser.c"
+#line 1467 "lang.tab.c"
     break;
 
   case 8:
@@ -1474,7 +1471,7 @@ yyreduce:
   {
     (yyval.c) = (TSeq((yyvsp[-2].c),(yyvsp[0].c)));
   }
-#line 1478 "parser.c"
+#line 1475 "lang.tab.c"
     break;
 
   case 9:
@@ -1482,7 +1479,7 @@ yyreduce:
   {
     (yyval.c) = (TIf((yyvsp[-10].e),(yyvsp[-6].c),(yyvsp[-1].c)));
   }
-#line 1486 "parser.c"
+#line 1483 "lang.tab.c"
     break;
 
   case 10:
@@ -1490,7 +1487,7 @@ yyreduce:
   {
     (yyval.c) = (TIf((yyvsp[-5].e),(yyvsp[-2].none),TSkip()));
   }
-#line 1494 "parser.c"
+#line 1491 "lang.tab.c"
     break;
 
   case 11:
@@ -1498,7 +1495,7 @@ yyreduce:
   {
     (yyval.c) = ((yyvsp[-1].c));
   }
-#line 1502 "parser.c"
+#line 1499 "lang.tab.c"
     break;
 
   case 12:
@@ -1506,7 +1503,7 @@ yyreduce:
   {
     (yyval.c) = TLoop((yyvsp[-6].c), (yyvsp[-1].c));
   }
-#line 1510 "parser.c"
+#line 1507 "lang.tab.c"
     break;
 
   case 13:
@@ -1514,7 +1511,7 @@ yyreduce:
   {
     (yyval.e_l) = (TExprList((yyvsp[0].e), NULL));
   }
-#line 1518 "parser.c"
+#line 1515 "lang.tab.c"
     break;
 
   case 14:
@@ -1522,7 +1519,7 @@ yyreduce:
   {
     (yyval.e_l) = (TExprList((yyvsp[-2].e), (yyvsp[-1].none)));
   }
-#line 1526 "parser.c"
+#line 1523 "lang.tab.c"
     break;
 
   case 15:
@@ -1530,7 +1527,7 @@ yyreduce:
   {
     (yyval.e) = (TConst((yyvsp[0].n)));
   }
-#line 1534 "parser.c"
+#line 1531 "lang.tab.c"
     break;
 
   case 16:
@@ -1538,7 +1535,7 @@ yyreduce:
   {
     (yyval.e) = ((yyvsp[-1].e));
   }
-#line 1542 "parser.c"
+#line 1539 "lang.tab.c"
     break;
 
   case 17:
@@ -1546,7 +1543,7 @@ yyreduce:
   {
     (yyval.e) = (TFun((yyvsp[-3].i), (yyvsp[-1].e_l)));
   }
-#line 1550 "parser.c"
+#line 1547 "lang.tab.c"
     break;
 
   case 18:
@@ -1554,7 +1551,7 @@ yyreduce:
   {
     (yyval.e) = (TVar((yyvsp[0].i)));
   }
-#line 1558 "parser.c"
+#line 1555 "lang.tab.c"
     break;
 
   case 19:
@@ -1562,7 +1559,7 @@ yyreduce:
   {
     (yyval.e) = (TUnOp(T_NOT,(yyvsp[0].e)));
   }
-#line 1566 "parser.c"
+#line 1563 "lang.tab.c"
     break;
 
   case 20:
@@ -1570,7 +1567,7 @@ yyreduce:
   {
     (yyval.e) = (TUnOp(T_UMINUS,(yyvsp[0].e)));
   }
-#line 1574 "parser.c"
+#line 1571 "lang.tab.c"
     break;
 
   case 21:
@@ -1578,7 +1575,7 @@ yyreduce:
   {
     (yyval.e) = ((yyvsp[0].e));
   }
-#line 1582 "parser.c"
+#line 1579 "lang.tab.c"
     break;
 
   case 22:
@@ -1586,7 +1583,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_MUL,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1590 "parser.c"
+#line 1587 "lang.tab.c"
     break;
 
   case 23:
@@ -1594,7 +1591,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_PLUS,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1598 "parser.c"
+#line 1595 "lang.tab.c"
     break;
 
   case 24:
@@ -1602,7 +1599,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_MINUS,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1606 "parser.c"
+#line 1603 "lang.tab.c"
     break;
 
   case 25:
@@ -1610,7 +1607,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_DIV,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1614 "parser.c"
+#line 1611 "lang.tab.c"
     break;
 
   case 26:
@@ -1618,7 +1615,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_MOD,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1622 "parser.c"
+#line 1619 "lang.tab.c"
     break;
 
   case 27:
@@ -1626,7 +1623,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_LT,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1630 "parser.c"
+#line 1627 "lang.tab.c"
     break;
 
   case 28:
@@ -1634,7 +1631,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_GT,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1638 "parser.c"
+#line 1635 "lang.tab.c"
     break;
 
   case 29:
@@ -1642,7 +1639,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_LE,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1646 "parser.c"
+#line 1643 "lang.tab.c"
     break;
 
   case 30:
@@ -1650,7 +1647,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_GE,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1654 "parser.c"
+#line 1651 "lang.tab.c"
     break;
 
   case 31:
@@ -1658,7 +1655,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_EQ,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1662 "parser.c"
+#line 1659 "lang.tab.c"
     break;
 
   case 32:
@@ -1666,7 +1663,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_NE,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1670 "parser.c"
+#line 1667 "lang.tab.c"
     break;
 
   case 33:
@@ -1674,7 +1671,7 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_AND,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1678 "parser.c"
+#line 1675 "lang.tab.c"
     break;
 
   case 34:
@@ -1682,11 +1679,11 @@ yyreduce:
   {
     (yyval.e) = (TBinOp(T_OR,(yyvsp[-2].e),(yyvsp[0].e)));
   }
-#line 1686 "parser.c"
+#line 1683 "lang.tab.c"
     break;
 
 
-#line 1690 "parser.c"
+#line 1687 "lang.tab.c"
 
       default: break;
     }
