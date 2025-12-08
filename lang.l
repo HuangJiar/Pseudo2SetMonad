@@ -41,7 +41,7 @@
     return TM_IDENT;
 }
 
-";" {
+";;" {
     return TM_SEMICOL;
     }
 
