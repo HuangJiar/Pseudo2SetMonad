@@ -316,6 +316,12 @@ void print_cmd(struct cmd * c) {
   case T_SKIP:
     printf("SKIP()");
     break;
+  case T_LOOP:
+    printf("LOOP(");
+    print_cmd(c -> d.LOOP.init);
+    printf(",");
+    print_cmd(c -> d.LOOP.body);
+    printf(")");
   }
 }
 

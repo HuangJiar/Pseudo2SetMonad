@@ -117,7 +117,7 @@
     return TM_NE;
     }
 
-"=" {
+"<-" {
     return TM_ASGNOP;
     }
 
