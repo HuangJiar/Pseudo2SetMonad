@@ -7,7 +7,7 @@ Tokens:
 - Spacer ( ) : ;; ,
 - Natural Number
 - Identity
-- Reserved Words if else loop_init loop_body continue break
+- Reserved Words if else loop_init loop_body continue break skip
 
 TO DO LIST.
 

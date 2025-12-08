@@ -36,6 +36,10 @@
     return TM_BREAK;
 }
 
+"skip" {
+    return TM_SKIP;
+}
+
 [_A-Za-z][_A-Za-z0-9]* {
     yylval.i = new_str(yytext, yyleng);
     return TM_IDENT;

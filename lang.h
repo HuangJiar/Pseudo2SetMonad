@@ -44,12 +44,15 @@ enum CmdType {
   T_SEQ,
   T_IF,
   T_CONTINUE,
-  T_BREAK
+  T_BREAK,
+  T_SKIP
   // ,
   // T_WHILE,
   // T_WI,
   // T_WC
 };
+
+struct expr_list;
 
 struct expr {
   enum ExprType t;
@@ -58,12 +61,17 @@ struct expr {
     struct {char * name; } VAR;
     struct {enum BinOpType op; struct expr * left; struct expr * right; } BINOP;
     struct {enum UnOpType op; struct expr * arg; } UNOP;
-    struct {char* name; struct expr ** arg; unsigned int argc;} FUN;
+    struct {char* name; struct expr_list * arg; unsigned int argc;} FUN;
     // struct {struct expr * arg; } DEREF;
     // struct {struct expr * arg; } MALLOC;
     // struct {void * none; } RI;
     // struct {void * none; } RC;
   } d;
+};
+
+struct expr_list {
+  expr * exp;
+  expr_list * nxt;
 };
 
 struct cmd {
@@ -75,6 +83,7 @@ struct cmd {
     struct {struct expr * cond; struct cmd * left; struct cmd * right; } IF;
     struct {} CONTINUE;
     struct {} BREAK;
+    struct {} SKIP;
     // struct {struct expr * cond; struct cmd * body; } WHILE;
     // struct {struct expr * arg; } WI;
     // struct {struct expr * arg; } WC;
@@ -96,9 +105,12 @@ struct cmd * TSeq(struct cmd * left, struct cmd * right);
 struct cmd * TIf(struct expr * cond, struct cmd * left, struct cmd * right);
 struct cmd * TContinue();
 struct cmd * TBreak();
+struct cmd * TSkip();
 // struct cmd * TWhile(struct expr * cond, struct cmd * body);
 // struct cmd * TWriteInt(struct expr * arg);
 // struct cmd * TWriteChar(struct expr * arg);
+
+struct expr_list * TExprList(struct expr * expr, struct expr_list * nxt);
 
 void print_binop(enum BinOpType op);
 void print_unop(enum UnOpType op);

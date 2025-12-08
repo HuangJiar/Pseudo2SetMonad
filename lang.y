@@ -11,6 +11,7 @@
 %union {
 unsigned int n;
 char * i;
+struct expr_list * e_l;
 struct expr * e;
 struct cmd * c;
 void * none;
@@ -73,25 +74,34 @@ NT_CMD:
   {
     $$ = (TSeq($1,$3));
   }
-| TM_IF NT_EXPR TM_THEN TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE TM_ELSE TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE
+| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN M_COLON NT_CMD TM_ELSE TM_COLON NT_CMD
   {
-    $$ = (TIf($2,$5,$9));
+    $$ = (TIf($3,$6,$9));
   }
-| TM_WHILE NT_EXPR TM_DO TM_LEFT_BRACE NT_CMD TM_RIGHT_BRACE
+| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN M_COLON NT_CMD
   {
-    $$ = (TWhile($2,$5));
+    $$ = (TIf($3,$6,TSkip()));
   }
-| TM_WI TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN
+| TM_CONTINUE
   {
-    $$ = (TWriteInt($3));
+    $$ = (TContinue());
   }
-| TM_WC TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN
+| TM_BREAK
   {
-    $$ = (TWriteChar($3));
+    $$ = (TBreak());
   }
 ;
 
-
+NT_EXPR_LIST:
+  NT_EXPR
+  {
+    $$ = (TExprList($1, NULL));
+  }
+| NT_EXPR TM_COMMA NT_EXPR_LIST
+  {
+    $$ = (TExprList($1, $2));
+  }
+;
 
 
 NT_EXPR_2:

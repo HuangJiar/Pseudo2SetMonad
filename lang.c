@@ -21,6 +21,15 @@ struct cmd * new_cmd_ptr() {
   return res;
 }
 
+struct expr_list * new_expr_list_ptr() {
+  struct expr_list* res = (struct expr_list *) malloc(sizeof(struct expr_list));
+  if (res == NULL) {
+    printf("Failure in malloc.\n");
+    exit(0);
+  }
+  return res;
+}
+
 struct expr * TConst(unsigned int value) {
   struct expr * res = new_expr_ptr();
   res -> t = T_CONST;
@@ -128,6 +137,19 @@ struct cmd * TContinue() {
 struct cmd * TBreak() {
   struct cmd * res = new_cmd_ptr();
   res -> t = T_BREAK;
+  return res;
+}
+
+struct cmd * TSkip() {
+  struct cmd * res = new_cmd_ptr();
+  res -> t = T_SKIP;
+  return res;
+}
+
+struct expr_list * TExprList(struct expr * expr, struct expr_list * nxt) {
+  struct expr_list * res = new_expr_list_ptr();
+  res->exp = expr;
+  res->nxt = nxt;
   return res;
 }
 
