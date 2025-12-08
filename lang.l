@@ -12,48 +12,28 @@
     return TM_NAT;
 }
 
-"var" {
-    return TM_VAR;
-}
-
 "if" {
     return TM_IF;
-}
-
-"then" {
-    return TM_THEN;
 }
 
 "else" {
     return TM_ELSE;
 }
 
-"while" {
-    return TM_WHILE;
+"loop_init" {
+    return TM_LOOP_INIT;
 }
 
-"do" {
-    return TM_DO;
+"loop_body" {
+    return TM_LOOP_BODY;
 }
 
-"malloc" {
-    return TM_MALLOC;
+"continue" {
+    return TM_CONTINUE;
 }
 
-"read_int" {
-    return TM_RI;
-}
-
-"read_char" {
-    return TM_RC;
-}
-
-"write_int" {
-    return TM_WI;
-}
-
-"write_char" {
-    return TM_WC;
+"break" {
+    return TM_BREAK;
 }
 
 [_A-Za-z][_A-Za-z0-9]* {
@@ -73,13 +53,13 @@
     return TM_RIGHT_PAREN;
     }
 
-"{" {
-    return TM_LEFT_BRACE;
-    }
+":" {
+    return TM_COLON;    
+}
 
-"}" {
-    return TM_RIGHT_BRACE;
-    }
+"," {
+    return TM_COMMA;
+}
 
 "+" {
     return TM_PLUS;

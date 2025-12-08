@@ -20,7 +20,8 @@ void * none;
 %token <n> TM_NAT
 %token <i> TM_IDENT
 %token <none> TM_LEFT_BRACE TM_RIGHT_BRACE
-%token <none> TM_LEFT_PAREN TM_RIGHT_PAREN
+%token <none> TM_COLON
+%token <none> TM_COMMA
 %token <none> TM_SEMICOL
 %token <none> TM_MALLOC TM_RI TM_RC TM_WI TM_WC
 %token <none> TM_VAR TM_IF TM_THEN TM_ELSE TM_WHILE TM_DO
@@ -89,6 +90,8 @@ NT_CMD:
     $$ = (TWriteChar($3));
   }
 ;
+
+
 
 
 NT_EXPR_2:

@@ -52,31 +52,40 @@ struct expr * TUnOp(enum UnOpType op, struct expr * arg) {
   return res;
 }
 
-struct expr * TDeref(struct expr * arg) {
+struct expr * TFun(char* name, struct expr ** arg, unsigned int argc) {
   struct expr * res = new_expr_ptr();
-  res -> t = T_DEREF;
-  res -> d.DEREF.arg = arg;
+  res -> t = T_FUN;
+  res -> d.FUN.name = name;
+  res -> d.FUN.arg = arg;
+  ret -> d.FUN.argc = argc;
   return res;
 }
 
-struct expr * TMalloc(struct expr * arg) {
-  struct expr * res = new_expr_ptr();
-  res -> t = T_MALLOC;
-  res -> d.MALLOC.arg = arg;
-  return res;
-}
+// struct expr * TDeref(struct expr * arg) {
+//   struct expr * res = new_expr_ptr();
+//   res -> t = T_DEREF;
+//   res -> d.DEREF.arg = arg;
+//   return res;
+// }
 
-struct expr * TReadInt() {
-  struct expr * res = new_expr_ptr();
-  res -> t = T_RI;
-  return res;
-}
+// struct expr * TMalloc(struct expr * arg) {
+//   struct expr * res = new_expr_ptr();
+//   res -> t = T_MALLOC;
+//   res -> d.MALLOC.arg = arg;
+//   return res;
+// }
 
-struct expr * TReadChar() {
-  struct expr * res = new_expr_ptr();
-  res -> t = T_RC;
-  return res;
-}
+// struct expr * TReadInt() {
+//   struct expr * res = new_expr_ptr();
+//   res -> t = T_RI;
+//   return res;
+// }
+
+// struct expr * TReadChar() {
+//   struct expr * res = new_expr_ptr();
+//   res -> t = T_RC;
+//   return res;
+// }
 
 struct cmd * TDecl(char * name) {
   struct cmd * res = new_cmd_ptr();
@@ -110,27 +119,39 @@ struct cmd * TIf(struct expr * cond, struct cmd * left, struct cmd * right) {
   return res;
 }
 
-struct cmd * TWhile(struct expr * cond, struct cmd * body) {
+struct cmd * TContinue() {
   struct cmd * res = new_cmd_ptr();
-  res -> t = T_WHILE;
-  res -> d.WHILE.cond = cond;
-  res -> d.WHILE.body = body;
+  res -> t = T_CONTINUE;
   return res;
 }
 
-struct cmd * TWriteInt(struct expr * arg) {
+struct cmd * TBreak() {
   struct cmd * res = new_cmd_ptr();
-  res -> t = T_WI;
-  res -> d.WI.arg = arg;
+  res -> t = T_BREAK;
   return res;
 }
 
-struct cmd * TWriteChar(struct expr * arg) {
-  struct cmd * res = new_cmd_ptr();
-  res -> t = T_WC;
-  res -> d.WC.arg = arg;
-  return res;
-}
+// struct cmd * TWhile(struct expr * cond, struct cmd * body) {
+//   struct cmd * res = new_cmd_ptr();
+//   res -> t = T_WHILE;
+//   res -> d.WHILE.cond = cond;
+//   res -> d.WHILE.body = body;
+//   return res;
+// }
+
+// struct cmd * TWriteInt(struct expr * arg) {
+//   struct cmd * res = new_cmd_ptr();
+//   res -> t = T_WI;
+//   res -> d.WI.arg = arg;
+//   return res;
+// }
+
+// struct cmd * TWriteChar(struct expr * arg) {
+//   struct cmd * res = new_cmd_ptr();
+//   res -> t = T_WC;
+//   res -> d.WC.arg = arg;
+//   return res;
+// }
 
 void print_binop(enum BinOpType op) {
   switch (op) {
