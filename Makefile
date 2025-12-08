@@ -11,7 +11,7 @@ parser.h: lang.y
 	bison -o parser.c -d -v lang.y
 
 lang.o: lang.c lang.h
-	gcc -c lang.c
+	gcc -c -g lang.c
 
 parser.o: parser.c parser.h lexer.h lang.h
 	gcc -c parser.c

@@ -280,6 +280,8 @@ void print_expr_list(struct expr_list * lst) {
 
 
 void print_cmd(struct cmd * c) {
+  // puts("#");
+  // printf("%lld\n", c);
   switch (c -> t) {
   case T_DECL:
     printf("DECL(%s)", c -> d.DECL.name);
