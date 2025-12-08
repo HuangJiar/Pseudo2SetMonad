@@ -49,6 +49,14 @@
     return TM_SEMICOL;
     }
 
+"{" {
+    return TM_LEFT_BRACE;
+}
+
+"}" {
+    return TM_RIGHT_BRACE;
+}
+
 "(" {
     return TM_LEFT_PAREN;
     }

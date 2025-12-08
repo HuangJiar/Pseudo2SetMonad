@@ -61,12 +61,11 @@ struct expr * TUnOp(enum UnOpType op, struct expr * arg) {
   return res;
 }
 
-struct expr * TFun(char* name, struct expr ** arg, unsigned int argc) {
+struct expr * TFun(char* name, struct expr_list * arg) {
   struct expr * res = new_expr_ptr();
   res -> t = T_FUN;
   res -> d.FUN.name = name;
   res -> d.FUN.arg = arg;
-  ret -> d.FUN.argc = argc;
   return res;
 }
 
@@ -230,6 +229,8 @@ void print_unop(enum UnOpType op) {
   }
 }
 
+
+
 void print_expr(struct expr * e) {
   switch (e -> t) {
   case T_CONST:
@@ -252,24 +253,23 @@ void print_expr(struct expr * e) {
     print_expr(e -> d.UNOP.arg);
     printf(")");
     break;
-  case T_DEREF:
-    printf("DEREF(");
-    print_expr(e -> d.DEREF.arg);
+  case T_FUN:
+    printf("FUN(%s", e->d.FUN.name);
+    print_expr_list(e->d.FUN.arg);
     printf(")");
-    break;
-  case T_MALLOC:
-    printf("MALLOC(");
-    print_expr(e -> d.MALLOC.arg);
-    printf(")");
-    break;
-  case T_RI:
-    printf("READ_INT()");
-    break;
-  case T_RC:
-    printf("READ_CHAR()");
     break;
   }
 }
+
+
+void print_expr_list(struct expr_list * lst) {
+  if (lst == NULL)
+    return;
+  printf(",");
+  print_expr(lst -> exp);
+  print_expr_list(lst -> nxt);
+}
+
 
 void print_cmd(struct cmd * c) {
   switch (c -> t) {
@@ -299,22 +299,14 @@ void print_cmd(struct cmd * c) {
     print_cmd(c -> d.IF.right);
     printf(")");
     break;
-  case T_WHILE:
-    printf("WHILE(");
-    print_expr(c -> d.WHILE.cond);
-    printf(",");
-    print_cmd(c -> d.WHILE.body);
-    printf(")");
+  case T_CONTINUE:
+    printf("CONTINUE()");
     break;
-  case T_WI:
-    printf("WRITE_INT(");
-    print_expr(c -> d.WI.arg);
-    printf(")");
+  case T_BREAK:
+    printf("BREAK()");
     break;
-  case T_WC:
-    printf("WRITE_CHAR(");
-    print_expr(c -> d.WC.arg);
-    printf(")");
+  case T_SKIP:
+    printf("SKIP()");
     break;
   }
 }

@@ -21,9 +21,14 @@ void * none;
 %token <n> TM_NAT
 %token <i> TM_IDENT
 %token <none> TM_LEFT_BRACE TM_RIGHT_BRACE
+%token <none> TM_LEFT_PAREN TM_RIGHT_PAREN
 %token <none> TM_COLON
 %token <none> TM_COMMA
+%token <none> TM_CONTINUE
+%token <none> TM_BREAK
+%token <none> TM_SKIP
 %token <none> TM_SEMICOL
+%token <none> TM_LOOP_INIT TM_LOOP_BODY
 %token <none> TM_MALLOC TM_RI TM_RC TM_WI TM_WC
 %token <none> TM_VAR TM_IF TM_THEN TM_ELSE TM_WHILE TM_DO
 %token <none> TM_ASGNOP
@@ -39,6 +44,7 @@ void * none;
 %type <c> NT_CMD
 %type <e> NT_EXPR_2
 %type <e> NT_EXPR
+%type <e_l> NT_EXPR_LIST
 
 // Priority
 %nonassoc TM_ASGNOP
@@ -74,11 +80,11 @@ NT_CMD:
   {
     $$ = (TSeq($1,$3));
   }
-| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN M_COLON NT_CMD TM_ELSE TM_COLON NT_CMD
+| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN TM_COLON NT_CMD TM_ELSE TM_COLON NT_CMD
   {
     $$ = (TIf($3,$6,$9));
   }
-| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN M_COLON NT_CMD
+| TM_IF TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN TM_COLON NT_CMD
   {
     $$ = (TIf($3,$6,TSkip()));
   }
@@ -89,6 +95,14 @@ NT_CMD:
 | TM_BREAK
   {
     $$ = (TBreak());
+  }
+| TM_SKIP
+  {
+    $$ = (TSkip());
+  }
+| NT_CMD TM_COLON
+  {
+    $$ = ($1);
   }
 ;
 
@@ -113,21 +127,13 @@ NT_EXPR_2:
   {
     $$ = ($2);
   }
+| TM_IDENT TM_LEFT_PAREN NT_EXPR_LIST TM_RIGHT_PAREN
+  {
+    $$ = (TFun($1, $3));
+  }
 | TM_IDENT
   {
     $$ = (TVar($1));
-  }
-| TM_RI TM_LEFT_PAREN TM_RIGHT_PAREN
-  {
-    $$ = (TReadInt());
-  }
-| TM_RC TM_LEFT_PAREN TM_RIGHT_PAREN
-  {
-    $$ = (TReadChar());
-  }
-| TM_MALLOC TM_LEFT_PAREN NT_EXPR TM_RIGHT_PAREN
-  {
-    $$ = (TMalloc($3));
   }
 | TM_NOT NT_EXPR_2
   {
@@ -136,10 +142,6 @@ NT_EXPR_2:
 | TM_MINUS NT_EXPR_2
   {
     $$ = (TUnOp(T_UMINUS,$2));
-  }
-| TM_MUL NT_EXPR_2
-  {
-    $$ = (TDeref($2));
   }
 ;
 

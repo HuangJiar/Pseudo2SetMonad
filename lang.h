@@ -53,6 +53,7 @@ enum CmdType {
 };
 
 struct expr_list;
+struct expr;
 
 struct expr {
   enum ExprType t;
@@ -61,17 +62,13 @@ struct expr {
     struct {char * name; } VAR;
     struct {enum BinOpType op; struct expr * left; struct expr * right; } BINOP;
     struct {enum UnOpType op; struct expr * arg; } UNOP;
-    struct {char* name; struct expr_list * arg; unsigned int argc;} FUN;
-    // struct {struct expr * arg; } DEREF;
-    // struct {struct expr * arg; } MALLOC;
-    // struct {void * none; } RI;
-    // struct {void * none; } RC;
+    struct {char* name; struct expr_list * arg;} FUN;
   } d;
 };
 
 struct expr_list {
-  expr * exp;
-  expr_list * nxt;
+  struct expr * exp;
+  struct expr_list * nxt;
 };
 
 struct cmd {
@@ -84,6 +81,7 @@ struct cmd {
     struct {} CONTINUE;
     struct {} BREAK;
     struct {} SKIP;
+    struct {struct cmd * init; struct cmd * body;} LOOP;
     // struct {struct expr * cond; struct cmd * body; } WHILE;
     // struct {struct expr * arg; } WI;
     // struct {struct expr * arg; } WC;
@@ -94,7 +92,7 @@ struct expr * TConst(unsigned int value);
 struct expr * TVar(char * name);
 struct expr * TBinOp(enum BinOpType op, struct expr * left, struct expr * right);
 struct expr * TUnOp(enum UnOpType op, struct expr * arg);
-struct expr * TFun(char * name, struct expr ** arg, unsigned int argc);
+struct expr * TFun(char * name, struct expr_list * arg);
 // struct expr * TDeref(struct expr * arg);
 // struct expr * TMalloc(struct expr * arg);
 // struct expr * TReadInt();
@@ -116,6 +114,7 @@ void print_binop(enum BinOpType op);
 void print_unop(enum UnOpType op);
 void print_expr(struct expr * e);
 void print_cmd(struct cmd * c);
+void print_expr_list(struct expr_list * lst);
 
 unsigned int build_nat(char * c, int len);
 char * new_str(char * str, int len);
