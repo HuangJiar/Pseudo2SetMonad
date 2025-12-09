@@ -145,6 +145,10 @@ NT_CMD_:
   {
     $$ = ($1);
   }
+| TM_SEMICOL
+  {
+    $$ = (TSkip());
+  }
 ;
 
 NT_EXPR_LIST:

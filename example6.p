@@ -1,5 +1,5 @@
 loop_init:
-        
+    ;;;;;;;;
 loop_body:
     if (counter < 10 && total < 1000):
         current <- data;;
