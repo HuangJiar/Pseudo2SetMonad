@@ -85,9 +85,6 @@ struct cmd {
     struct {} SKIP;
     struct {struct cmd * init; struct cmd * body;} LOOP;
     struct {struct expr * exp;} EXPR;
-    // struct {struct expr * cond; struct cmd * body; } WHILE;
-    // struct {struct expr * arg; } WI;
-    // struct {struct expr * arg; } WC;
   } d;
 };
 

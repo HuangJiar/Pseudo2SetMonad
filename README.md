@@ -7,7 +7,9 @@ Tokens:
 - Spacer ( ) : ;; , { }
 - Natural Number
 - Identity
-- Reserved Words if else loop_init loop_body continue break skip
+- Reserved Words if else loop_init loop_body continue break skip true false
+
+
 
 
 I have add -g in Makefile. Remember of delete it while the project is handed in.
