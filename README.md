@@ -15,7 +15,7 @@ This is the repo of the programming project of CS2205-2025Fall in SJTU.
 
 Similar to Python, we use indentation to distinguish code blocks.
 
-4 spaces per indent level. We automatically add "{" when indent level increase end "}" when decrease.
+4 spaces per indent level. In practice we automatically add "{" when indent level increase end "}" when decrease. (Adding braces manually to avoid add indentation is allowed. But **don't use both of them simutaniously**.)
 
 The commands enclosed in a pair of braces is regarded as a command block.
 
@@ -133,6 +133,8 @@ The commands enclosed in a pair of braces is regarded as a command block.
   if (a < 0):{
     a <- 1
   }
+  // invalid
+  if (a < 0): a <- 1
   // invalid
   ```
 - We have not supported comments in the code. all `//`-style comments in the above examples are just for convinience. They can not be recognized or paresed (and result in "syntax error").
