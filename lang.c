@@ -142,148 +142,599 @@ struct expr_list * TExprList(struct expr * expr, struct expr_list * nxt) {
   return res;
 }
 
-void print_binop(enum BinOpType op) {
-  switch (op) {
-  case T_PLUS:
-    printf("PLUS");
-    break;
-  case T_MINUS:
-    printf("MINUS");
-    break;
-  case T_MUL:
-    printf("MUL");
-    break;
-  case T_DIV:
-    printf("DIV");
-    break;
-  case T_MOD:
-    printf("MOD");
-    break;
-  case T_LT:
-    printf("LT");
-    break;
-  case T_GT:
-    printf("GT");
-    break;
-  case T_LE:
-    printf("LE");
-    break;
-  case T_GE:
-    printf("GE");
-    break;
-  case T_EQ:
-    printf("EQ");
-    break;
-  case T_NE:
-    printf("NE");
-    break;
-  case T_AND:
-    printf("AND");
-    break;
-  case T_OR:
-    printf("OR");
-    break;
+
+#define PP_INDENT_UNIT 2
+
+struct var_list;
+
+struct loop_map {
+  const struct cmd *loop;
+  int id;
+  struct var_list *vars;
+  struct loop_map *next;
+};
+
+struct var_list {
+  char *name;
+  struct var_list *next;
+};
+
+static struct loop_map *g_loops = NULL;
+static int g_loop_counter = 0;
+
+static void pp_spaces(int n) {
+  for (int i = 0; i < n; i++) {
+    putchar(' ');
   }
 }
 
-void print_unop(enum UnOpType op) {
-  switch (op) {
-  case T_UMINUS:
-    printf("UMINUS");
-    break;
-  case T_NOT:
-    printf("NOT");
-    break;
-  }
+static void pp_newline(int indent) {
+  putchar('\n');
+  pp_spaces(indent);
 }
 
-void print_expr(struct expr * e) {
-  switch (e -> t) {
-  case T_CONST:
-    printf("CONST(%d)", e -> d.CONST.value);
-    break;
-  case T_VAR:
-    printf("VAR(%s)", e -> d.VAR.name);
-    break;
-  case T_BINOP:
-    print_binop(e -> d.BINOP.op);
-    printf("(");
-    print_expr(e -> d.BINOP.left);
-    printf(",");
-    print_expr(e -> d.BINOP.right);
-    printf(")");
-    break;
-  case T_UNOP:
-    print_unop(e -> d.UNOP.op);
-    printf("(");
-    print_expr(e -> d.UNOP.arg);
-    printf(")");
-    break;
-  case T_FUN:
-    printf("FUN(%s", e->d.FUN.name);
-    print_expr_list(e->d.FUN.arg);
-    printf(")");
-    break;
+static int loop_id_of(const struct cmd *loop) {
+  for (struct loop_map *p = g_loops; p != NULL; p = p->next) {
+    if (p->loop == loop) {
+      return p->id;
+    }
   }
+  return -1;
 }
 
-void print_expr_list(struct expr_list * lst) {
-  if (lst == NULL)
+static struct loop_map *loop_map_of(const struct cmd *loop) {
+  for (struct loop_map *p = g_loops; p != NULL; p = p->next) {
+    if (p->loop == loop) {
+      return p;
+    }
+  }
+  return NULL;
+}
+
+static int var_list_contains(const struct var_list *vars, const char *name) {
+  for (const struct var_list *p = vars; p != NULL; p = p->next) {
+    if (p->name != NULL && name != NULL && strcmp(p->name, name) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static void var_list_append(struct var_list **vars, char *name) {
+  if (name == NULL) {
     return;
-  printf(",");
-  print_expr(lst -> exp);
-  print_expr_list(lst -> nxt);
+  }
+  if (var_list_contains(*vars, name)) {
+    return;
+  }
+
+  struct var_list *node = (struct var_list *)malloc(sizeof(struct var_list));
+  if (node == NULL) {
+    printf("Failure in malloc.\n");
+    exit(0);
+  }
+  node->name = name;
+  node->next = NULL;
+
+  if (*vars == NULL) {
+    *vars = node;
+    return;
+  }
+  struct var_list *tail = *vars;
+  while (tail->next != NULL) {
+    tail = tail->next;
+  }
+  tail->next = node;
 }
 
-
-void print_cmd(struct cmd * c) {
-  switch (c -> t) {
-  case T_DECL:
-    printf("DECL(%s)", c -> d.DECL.name);
-    break;
+static void collect_vars_in_cmd(struct cmd *c, struct var_list **vars) {
+  if (c == NULL) {
+    return;
+  }
+  switch (c->t) {
   case T_ASGN:
-    printf("ASGN(");
-    print_expr(c -> d.ASGN.left);
-    printf(",");
-    print_expr(c -> d.ASGN.right);
-    printf(")");
+    if (c->d.ASGN.left != NULL && c->d.ASGN.left->t == T_VAR) {
+      var_list_append(vars, c->d.ASGN.left->d.VAR.name);
+    }
     break;
   case T_SEQ:
-    printf("SEQ(");
-    print_cmd(c -> d.SEQ.left);
-    printf(",");
-    print_cmd(c -> d.SEQ.right);
-    printf(")");
+    collect_vars_in_cmd(c->d.SEQ.left, vars);
+    collect_vars_in_cmd(c->d.SEQ.right, vars);
     break;
   case T_IF:
-    printf("IF(");
-    print_expr(c -> d.IF.cond);
-    printf(",");
-    print_cmd(c -> d.IF.left);
-    printf(",");
-    print_cmd(c -> d.IF.right);
-    printf(")");
-    break;
-  case T_CONTINUE:
-    printf("CONTINUE()");
-    break;
-  case T_BREAK:
-    printf("BREAK()");
-    break;
-  case T_SKIP:
-    printf("SKIP()");
+    collect_vars_in_cmd(c->d.IF.left, vars);
+    collect_vars_in_cmd(c->d.IF.right, vars);
     break;
   case T_LOOP:
-    printf("LOOP(");
-    print_cmd(c -> d.LOOP.init);
-    printf(",");
-    print_cmd(c -> d.LOOP.body);
-    printf(")");
+    collect_vars_in_cmd(c->d.LOOP.init, vars);
+    collect_vars_in_cmd(c->d.LOOP.body, vars);
     break;
-  case T_EXPR:
-    print_expr(c -> d.EXPR.exp);
+  default:
     break;
   }
+}
+
+static void collect_loops(const struct cmd *c) {
+  if (c == NULL) {
+    return;
+  }
+  switch (c->t) {
+  case T_SEQ:
+    collect_loops(c->d.SEQ.left);
+    collect_loops(c->d.SEQ.right);
+    break;
+  case T_IF:
+    collect_loops(c->d.IF.left);
+    collect_loops(c->d.IF.right);
+    break;
+  case T_LOOP: {
+    if (loop_id_of(c) == -1) {
+      struct loop_map *node = (struct loop_map *)malloc(sizeof(struct loop_map));
+      if (node == NULL) {
+        printf("Failure in malloc.\n");
+        exit(0);
+      }
+      node->loop = c;
+      node->id = g_loop_counter++;
+      node->vars = NULL;
+      node->next = g_loops;
+      g_loops = node;
+
+      /* Variables threaded through repeat_break: those assigned in init/body. */
+      collect_vars_in_cmd((struct cmd *)c->d.LOOP.init, &node->vars);
+      collect_vars_in_cmd((struct cmd *)c->d.LOOP.body, &node->vars);
+    }
+    collect_loops(c->d.LOOP.init);
+    collect_loops(c->d.LOOP.body);
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+static void free_loops(void) {
+  while (g_loops != NULL) {
+    struct loop_map *next = g_loops->next;
+    while (g_loops->vars != NULL) {
+      struct var_list *vnext = g_loops->vars->next;
+      free(g_loops->vars);
+      g_loops->vars = vnext;
+    }
+    free(g_loops);
+    g_loops = next;
+  }
+  g_loop_counter = 0;
+}
+
+static void pp_expr(struct expr *e);
+static void pp_cmd_expr(struct cmd *c, int indent);
+
+static int var_list_length(const struct var_list *vars);
+static void pp_state_type(const struct var_list *vars);
+static void pp_state_pattern(const struct var_list *vars);
+static void pp_state_tuple(const struct var_list *vars);
+static void pp_cmd_loop_body(struct cmd *c, int indent, const struct var_list *vars);
+
+static int var_list_length(const struct var_list *vars) {
+  int n = 0;
+  for (const struct var_list *p = vars; p != NULL; p = p->next) {
+    n++;
+  }
+  return n;
+}
+
+static void pp_state_type(const struct var_list *vars) {
+  int n = var_list_length(vars);
+  if (n <= 0) {
+    printf("unit");
+    return;
+  }
+  for (int i = 0; i < n; i++) {
+    if (i == 0) {
+      printf("Z");
+    } else {
+      printf(" * Z");
+    }
+  }
+}
+
+static void pp_state_pattern_rec(const struct var_list *vars) {
+  if (vars == NULL) {
+    printf("tt");
+    return;
+  }
+  if (vars->next == NULL) {
+    printf("%s", vars->name);
+    return;
+  }
+  putchar('(');
+  printf("%s", vars->name);
+  printf(", ");
+  if (vars->next->next == NULL) {
+    printf("%s", vars->next->name);
+  } else {
+    pp_state_pattern_rec(vars->next);
+  }
+  putchar(')');
+}
+
+static void pp_state_pattern(const struct var_list *vars) {
+  int n = var_list_length(vars);
+  if (n <= 0) {
+    printf("_");
+    return;
+  }
+  if (n == 1) {
+    printf("%s", vars->name);
+    return;
+  }
+  printf("'");
+  pp_state_pattern_rec(vars);
+}
+
+static void pp_state_tuple_rec(const struct var_list *vars) {
+  if (vars == NULL) {
+    printf("tt");
+    return;
+  }
+  if (vars->next == NULL) {
+    printf("%s", vars->name);
+    return;
+  }
+  putchar('(');
+  printf("%s", vars->name);
+  printf(", ");
+  if (vars->next->next == NULL) {
+    printf("%s", vars->next->name);
+  } else {
+    pp_state_tuple_rec(vars->next);
+  }
+  putchar(')');
+}
+
+static void pp_state_tuple(const struct var_list *vars) {
+  int n = var_list_length(vars);
+  if (n <= 0) {
+    printf("tt");
+    return;
+  }
+  if (n == 1) {
+    printf("%s", vars->name);
+    return;
+  }
+  pp_state_tuple_rec(vars);
+}
+
+static void pp_expr(struct expr *e) {
+  if (e == NULL) {
+    return;
+  }
+  switch (e->t) {
+  case T_CONST:
+    printf("%u", e->d.CONST.value);
+    break;
+  case T_VAR:
+    printf("%s", e->d.VAR.name);
+    break;
+  case T_BINOP:
+    putchar('(');
+    pp_expr(e->d.BINOP.left);
+    switch (e->d.BINOP.op) {
+    case T_PLUS:
+      printf(" + ");
+      break;
+    case T_MINUS:
+      printf(" - ");
+      break;
+    case T_MUL:
+      printf(" * ");
+      break;
+    case T_DIV:
+      printf(" / ");
+      break;
+    case T_MOD:
+      printf(" mod ");
+      break;
+    case T_LT:
+      printf(" < ");
+      break;
+    case T_GT:
+      printf(" > ");
+      break;
+    case T_LE:
+      printf(" <= ");
+      break;
+    case T_GE:
+      printf(" >= ");
+      break;
+    case T_EQ:
+      printf(" = ");
+      break;
+    case T_NE:
+      printf(" <> ");
+      break;
+    case T_AND:
+      printf(" /\\ ");
+      break;
+    case T_OR:
+      putchar(' ');
+      putchar('\\');
+      putchar('/');
+      putchar(' ');
+      break;
+    }
+    pp_expr(e->d.BINOP.right);
+    putchar(')');
+    break;
+  case T_UNOP:
+    if (e->d.UNOP.op == T_UMINUS) {
+      printf("(-");
+      pp_expr(e->d.UNOP.arg);
+      putchar(')');
+    } else {
+      printf("(~ ");
+      pp_expr(e->d.UNOP.arg);
+      putchar(')');
+    }
+    break;
+  case T_FUN:
+    printf("%s", e->d.FUN.name);
+    for (struct expr_list *it = e->d.FUN.arg; it != NULL; it = it->nxt) {
+      putchar(' ');
+      pp_expr(it->exp);
+    }
+    break;
+  }
+}
+
+void print_expr(struct expr *e) {
+  pp_expr(e);
+}
+
+static void pp_cmd_expr(struct cmd *c, int indent) {
+  if (c == NULL) {
+    printf("ret tt");
+    return;
+  }
+  switch (c->t) {
+  case T_DECL:
+    printf("ret tt");
+    break;
+  case T_ASGN:
+    if (c->d.ASGN.left != NULL && c->d.ASGN.left->t == T_VAR) {
+      printf("%s <- ", c->d.ASGN.left->d.VAR.name);
+      pp_expr(c->d.ASGN.right);
+      printf(";;");
+    } else {
+      pp_expr(c->d.ASGN.left);
+      printf(" <- ");
+      pp_expr(c->d.ASGN.right);
+      printf(";;");
+    }
+    break;
+  case T_SEQ:
+    pp_cmd_expr(c->d.SEQ.left, indent);
+    pp_newline(indent);
+    pp_cmd_expr(c->d.SEQ.right, indent);
+    break;
+  case T_IF:
+    printf("choice");
+    pp_newline(indent + PP_INDENT_UNIT);
+    putchar('(');
+    printf("assume (");
+    pp_expr(c->d.IF.cond);
+    printf(");;");
+    pp_newline(indent + 2 * PP_INDENT_UNIT);
+    pp_cmd_expr(c->d.IF.left, indent + 2 * PP_INDENT_UNIT);
+    putchar(')');
+    pp_newline(indent + PP_INDENT_UNIT);
+    putchar('(');
+    printf("assume (~ ");
+    pp_expr(c->d.IF.cond);
+    printf(");;");
+    pp_newline(indent + 2 * PP_INDENT_UNIT);
+    pp_cmd_expr(c->d.IF.right, indent + 2 * PP_INDENT_UNIT);
+    putchar(')');
+    break;
+  case T_CONTINUE:
+    printf("continue tt");
+    break;
+  case T_BREAK:
+    printf("break tt");
+    break;
+  case T_SKIP:
+    printf("ret tt");
+    break;
+  case T_LOOP: {
+    int id = loop_id_of(c);
+    if (id < 0) {
+      id = 0;
+    }
+    struct loop_map *lm = loop_map_of(c);
+    const struct var_list *vars = (lm == NULL ? NULL : lm->vars);
+
+    /* First run loop_init to bind initial state variables. */
+    if (c->d.LOOP.init != NULL && c->d.LOOP.init->t != T_SKIP) {
+      pp_cmd_expr(c->d.LOOP.init, indent);
+      pp_newline(indent);
+    }
+
+    /* Then call repeat_break with initial state and bind the returned state. */
+    pp_state_pattern(vars);
+    printf(" <- repeat_break body_%d ", id);
+    pp_state_tuple(vars);
+    printf(";;");
+    break;
+  }
+  case T_EXPR:
+    if (c->d.EXPR.exp != NULL && c->d.EXPR.exp->t == T_FUN) {
+      pp_expr(c->d.EXPR.exp);
+    } else {
+      printf("ret (");
+      pp_expr(c->d.EXPR.exp);
+      putchar(')');
+    }
+    break;
+  }
+}
+
+static int cmd_always_terminal_in_loop_body(const struct cmd *c) {
+  if (c == NULL) {
+    return 0;
+  }
+  switch (c->t) {
+  case T_CONTINUE:
+  case T_BREAK:
+    return 1;
+  case T_SEQ:
+    return cmd_always_terminal_in_loop_body(c->d.SEQ.right);
+  case T_IF:
+    return cmd_always_terminal_in_loop_body(c->d.IF.left) &&
+           cmd_always_terminal_in_loop_body(c->d.IF.right);
+  default:
+    return 0;
+  }
+}
+
+static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_list *vars, int is_tail);
+
+static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_list *vars, int is_tail) {
+  if (c == NULL) {
+    if (is_tail) {
+      printf("continue ");
+      pp_state_tuple(vars);
+    } else {
+      printf("ret tt");
+    }
+    return;
+  }
+
+  switch (c->t) {
+  case T_DECL:
+    printf("ret tt");
+    break;
+  case T_ASGN:
+    if (c->d.ASGN.left != NULL && c->d.ASGN.left->t == T_VAR) {
+      printf("%s <- ", c->d.ASGN.left->d.VAR.name);
+      pp_expr(c->d.ASGN.right);
+      printf(";;");
+    } else {
+      pp_expr(c->d.ASGN.left);
+      printf(" <- ");
+      pp_expr(c->d.ASGN.right);
+      printf(";;");
+    }
+    break;
+  case T_SEQ:
+    pp_cmd_loop_body_inner(c->d.SEQ.left, indent, vars, 0);
+    pp_newline(indent);
+    pp_cmd_loop_body_inner(c->d.SEQ.right, indent, vars, is_tail);
+    return;
+  case T_IF:
+    printf("choice");
+    pp_newline(indent + PP_INDENT_UNIT);
+    putchar('(');
+    printf("assume (");
+    pp_expr(c->d.IF.cond);
+    printf(");;");
+    pp_newline(indent + 2 * PP_INDENT_UNIT);
+    pp_cmd_loop_body_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, vars, 1);
+    putchar(')');
+    pp_newline(indent + PP_INDENT_UNIT);
+    putchar('(');
+    printf("assume (~ ");
+    pp_expr(c->d.IF.cond);
+    printf(");;");
+    pp_newline(indent + 2 * PP_INDENT_UNIT);
+    pp_cmd_loop_body_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, vars, 1);
+    putchar(')');
+    return;
+  case T_CONTINUE:
+    printf("continue ");
+    pp_state_tuple(vars);
+    return;
+  case T_BREAK:
+    printf("break ");
+    pp_state_tuple(vars);
+    return;
+  case T_SKIP:
+    printf("ret tt");
+    break;
+  case T_LOOP:
+    pp_cmd_expr(c, indent);
+    break;
+  case T_EXPR:
+    if (c->d.EXPR.exp != NULL && c->d.EXPR.exp->t == T_FUN) {
+      pp_expr(c->d.EXPR.exp);
+      printf(";;");
+    } else {
+      printf("ret (");
+      pp_expr(c->d.EXPR.exp);
+      printf(");;");
+    }
+    break;
+  }
+
+  if (is_tail && !cmd_always_terminal_in_loop_body(c)) {
+    pp_newline(indent);
+    printf("continue ");
+    pp_state_tuple(vars);
+  }
+}
+
+static void pp_cmd_loop_body(struct cmd *c, int indent, const struct var_list *vars) {
+  pp_cmd_loop_body_inner(c, indent, vars, 1);
+}
+
+static void pp_emit_loop_definitions(void) {
+  /* g_loops is a stack (LIFO). Emit in reverse id order to get stable numbering. */
+  for (int id = g_loop_counter - 1; id >= 0; id--) {
+    const struct cmd *loop = NULL;
+    const struct var_list *vars = NULL;
+    for (struct loop_map *p = g_loops; p != NULL; p = p->next) {
+      if (p->id == id) {
+        loop = p->loop;
+        vars = p->vars;
+        break;
+      }
+    }
+    if (loop == NULL) {
+      continue;
+    }
+
+    printf("Definition body_%d : ", id);
+    pp_state_type(vars);
+    printf(" -> SetMonad.M (ContinueOrBreak ");
+    pp_state_type(vars);
+    printf(" ");
+    pp_state_type(vars);
+    printf(") :=\n");
+    printf("  fun ");
+    pp_state_pattern(vars);
+    printf(" =>\n");
+    printf("  ");
+    pp_cmd_loop_body(((struct cmd *)loop)->d.LOOP.body, 2, vars);
+    printf(".\n\n");
+  }
+}
+
+static void pp_program(struct cmd *root) {
+  free_loops();
+  collect_loops(root);
+
+  pp_emit_loop_definitions();
+
+  printf("Definition main : SetMonad.M unit :=\n");
+  printf("  ");
+  pp_cmd_expr(root, 2);
+  printf(".\n");
+
+  free_loops();
+}
+
+void print_cmd(struct cmd *c) {
+  pp_program(c);
 }
 
 unsigned int build_nat(char * c, int len) {
@@ -311,4 +762,3 @@ char * new_str(char * str, int len) {
   strcpy(res, str);
   return res;
 }
-

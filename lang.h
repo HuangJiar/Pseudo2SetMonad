@@ -95,7 +95,6 @@ void print_binop(enum BinOpType op);
 void print_unop(enum UnOpType op);
 void print_expr(struct expr * e);
 void print_cmd(struct cmd * c);
-void print_expr_list(struct expr_list * lst);
 
 // Others
 unsigned int build_nat(char * c, int len);
