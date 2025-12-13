@@ -308,6 +308,7 @@ static void free_loops(void) {
 }
 
 static void pp_expr(struct expr *e);
+static void pp_cmd_expr_inner(struct cmd *c, int indent, int is_tail);
 static void pp_cmd_expr(struct cmd *c, int indent);
 
 static int var_list_length(const struct var_list *vars);
@@ -492,7 +493,7 @@ void print_expr(struct expr *e) {
   pp_expr(e);
 }
 
-static void pp_cmd_expr(struct cmd *c, int indent) {
+static void pp_cmd_expr_inner(struct cmd *c, int indent, int is_tail) {
   if (c == NULL) {
     printf("ret tt");
     return;
@@ -500,6 +501,9 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
   switch (c->t) {
   case T_DECL:
     printf("ret tt");
+    if (!is_tail) {
+      printf(";;");
+    }
     break;
   case T_ASGN:
     if (c->d.ASGN.left != NULL && c->d.ASGN.left->t == T_VAR) {
@@ -512,11 +516,15 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
       pp_expr(c->d.ASGN.right);
       printf(";;");
     }
+    if (is_tail) {
+      pp_newline(indent);
+      printf("ret tt");
+    }
     break;
   case T_SEQ:
-    pp_cmd_expr(c->d.SEQ.left, indent);
+    pp_cmd_expr_inner(c->d.SEQ.left, indent, 0);
     pp_newline(indent);
-    pp_cmd_expr(c->d.SEQ.right, indent);
+    pp_cmd_expr_inner(c->d.SEQ.right, indent, is_tail);
     break;
   case T_IF:
     printf("choice");
@@ -526,7 +534,7 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
     pp_expr(c->d.IF.cond);
     printf(");;");
     pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_expr(c->d.IF.left, indent + 2 * PP_INDENT_UNIT);
+    pp_cmd_expr_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, 1);
     putchar(')');
     pp_newline(indent + PP_INDENT_UNIT);
     putchar('(');
@@ -534,17 +542,29 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
     pp_expr(c->d.IF.cond);
     printf(");;");
     pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_expr(c->d.IF.right, indent + 2 * PP_INDENT_UNIT);
+    pp_cmd_expr_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, 1);
     putchar(')');
+    if (!is_tail) {
+      printf(";;");
+    }
     break;
   case T_CONTINUE:
     printf("continue tt");
+    if (!is_tail) {
+      printf(";;");
+    }
     break;
   case T_BREAK:
     printf("break tt");
+    if (!is_tail) {
+      printf(";;");
+    }
     break;
   case T_SKIP:
     printf("ret tt");
+    if (!is_tail) {
+      printf(";;");
+    }
     break;
   case T_LOOP: {
     int id = loop_id_of(c);
@@ -556,7 +576,7 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
 
     /* First run loop_init to bind initial state variables. */
     if (c->d.LOOP.init != NULL && c->d.LOOP.init->t != T_SKIP) {
-      pp_cmd_expr(c->d.LOOP.init, indent);
+      pp_cmd_expr_inner(c->d.LOOP.init, indent, 0);
       pp_newline(indent);
     }
 
@@ -565,9 +585,15 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
     printf(" <- repeat_break body_%d ", id);
     pp_state_tuple(vars);
     printf(";;");
+    if (is_tail) {
+      pp_newline(indent);
+      printf("ret tt");
+    }
     break;
   }
   case T_EXPR:
+    /* Discard unused result: bind to '_' */
+    printf("_ <- ");
     if (c->d.EXPR.exp != NULL && c->d.EXPR.exp->t == T_FUN) {
       pp_expr(c->d.EXPR.exp);
     } else {
@@ -575,8 +601,17 @@ static void pp_cmd_expr(struct cmd *c, int indent) {
       pp_expr(c->d.EXPR.exp);
       putchar(')');
     }
+    printf(";;");
+    if (is_tail) {
+      pp_newline(indent);
+      printf("ret tt");
+    }
     break;
   }
+}
+
+static void pp_cmd_expr(struct cmd *c, int indent) {
+  pp_cmd_expr_inner(c, indent, 1);
 }
 
 static int cmd_always_terminal_in_loop_body(const struct cmd *c) {
@@ -662,17 +697,20 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     printf("ret tt");
     break;
   case T_LOOP:
-    pp_cmd_expr(c, indent);
+    /* Nested loop inside loop body is a statement; sequence it. */
+    pp_cmd_expr_inner(c, indent, 0);
     break;
   case T_EXPR:
+    /* Discard unused result: bind to '_' */
+    printf("_ <- ");
     if (c->d.EXPR.exp != NULL && c->d.EXPR.exp->t == T_FUN) {
       pp_expr(c->d.EXPR.exp);
-      printf(";;");
     } else {
       printf("ret (");
       pp_expr(c->d.EXPR.exp);
-      printf(");;");
+      putchar(')');
     }
+    printf(";;");
     break;
   }
 
