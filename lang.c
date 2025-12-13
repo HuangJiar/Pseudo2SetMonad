@@ -705,11 +705,11 @@ static void pp_emit_loop_definitions(void) {
 
     printf("Definition body_%d : ", id);
     pp_state_type(vars);
-    printf(" -> SetMonad.M (ContinueOrBreak ");
+    printf(" -> SetMonad.M (ContinueOrBreak (");
     pp_state_type(vars);
-    printf(" ");
+    printf(") (");
     pp_state_type(vars);
-    printf(") :=\n");
+    printf(")) :=\n");
     printf("  fun ");
     pp_state_pattern(vars);
     printf(" =>\n");
