@@ -111,12 +111,8 @@ struct cmd * TExpr(struct expr * exp);
 // struct cmd * TWriteChar(struct expr * arg);
 
 struct expr_list * TExprList(struct expr * expr, struct expr_list * nxt);
-
-void print_binop(enum BinOpType op);
-void print_unop(enum UnOpType op);
 void print_expr(struct expr * e);
 void print_cmd(struct cmd * c);
-void print_expr_list(struct expr_list * lst);
 
 unsigned int build_nat(char * c, int len);
 char * new_str(char * str, int len);
