@@ -7,8 +7,8 @@ This is the repo of the programming project of CS2205-2025Fall in SJTU.
 - Spacer ( ) : ;; , { }
 - Natural Number 0|[1-9][0-9]*
 - Identity [_A-Za-z][_A-Za-z0-9]*  
-  **Note: We additionally require that the identity can not be '\_'.**
-- Reserved Words if else loop_init loop_body continue break skip true false _
+  **Note: We additionally require that the identity can not be '\_', since this is used as a reserved word.**
+- Reserved Words _ if else loop_init loop_body continue break skip true false 
 
 ### Grammar:
 
@@ -23,6 +23,8 @@ The commands enclosed in a pair of braces is regarded as a command block.
 #### Expression
 
  Very similar to that of C, with the same priority.
+
+ **Note: If not specially mentioned, we need the functions appearing in expressions be of type `T1->T2->...->Z`.**
 
 #### Commands
 
@@ -39,6 +41,7 @@ The commands enclosed in a pair of braces is regarded as a command block.
   e.g. `Var a`
 - Expression: [expr]
   e.g. `cmp(a1, a2)`
+  **Note: Due to the grammer of Coq and our implementation. Now only [expr] with type of function is properly supported.Furthermore, we need to ensure that the function is defined of type `T1->T2->...->SetMonad.M Z` to make sure that our Coq code works.We assume the function does not change the value of variables.**
 
 ###### Blocked Commands
 
@@ -142,9 +145,9 @@ The commands enclosed in a pair of braces is regarded as a command block.
 
 ### Translating to Coq Program
 
-  We assume that all functions that are used as a single command (e.g. `cmp(a1, a2)`) or are used in arithmatic calculations (e.g. `fib(n1)+fib(n2)`) are of the type `T1 -> T2 -> ... -> Tn -> SetMonad.M Z`, where `n` is the number of variables.
+  <!-- We assume that all functions that are used as a single command (e.g. `cmp(a1, a2)`) or are used in arithmatic calculations (e.g. `fib(n1)+fib(n2)`) are of the type `T1 -> T2 -> ... -> Tn -> SetMonad.M Z`, where `n` is the number of variables. -->
 
-  We assume that our program have name `main`, which is of type SetMonad.unit.
+  We assume that our program have name `main`, which is of type SetMonad.unit. First let's take a look at a simple example.
 
   example:
   initial psedue code:
@@ -183,6 +186,39 @@ The commands enclosed in a pair of braces is regarded as a command block.
 
   Although the above example shows that Coq program with `list Z` can also fit with the code we generate, we recommand that you only use this program to translate psedue code only involving `Z` to Coq program.
 
+  ###### Adjustment involving `if` structure
+
+  When we need to deal with if, we will make small changes to the original code. We will paste the commands after the `if` block into the two command blocks of `if`. More specifically, we will translate the structure
+
+  ```
+  if ([expr]):
+      [command block1]
+  else: 
+      [command block2]
+  [command block3]
+  ```
+
+  to
+
+  ```
+  if ([expr]):
+      [command block1](;;)
+      [command block3]
+  else: 
+      [command block2](;;)
+      [command block3]
+  ```
+
+  Here (;;\) means we only add colons when needed. We will repeat this process if the last command in either command block1 or command block2 is `if` block.
+
+  Easy to observe that the two forms are equivalent in result. Such adjustment is to fit the grammer of SetMonad.
+
+  ###### Adjustment involving `break` and `continue`
+
+  We will automatically delete all commands after break and continue. This does not change the result of the program. Such design is also aimed to fit Coq.
+
+  We will not check whether `break` or `continue` is used outside a loop.(In that case the result Coq code can not be properly parsed by Coq) We assume that the input pseudo code is valid.
+
 ### How to run
 
  ```
@@ -198,6 +234,6 @@ TO DO LIST.
 - [x] Design the grammer
 - [x] Lexer
 - [x] Parser
-- [ ] Print to SetMonad
-- [ ] Write the documenet
+- [x] Print to SetMonad
+- [x] Write the documenet
 

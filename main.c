@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     yyin = temp;
     int parse_result = yyparse();
     fclose(temp);
-    
+
     // 检查解析结果
     if (parse_result != 0) {
         fprintf(stderr, "Parsing failed with error code %d\n", parse_result);
