@@ -231,12 +231,3 @@ The commands enclosed in a pair of braces is regarded as a command block.
  
  If you want to see the code generated after adding braces, you can add parameter `-V`. Then the code will be printed to `stderr`.
 
-
-TO DO LIST.
-
-- [x] Design the grammer
-- [x] Lexer
-- [x] Parser
-- [x] Print to SetMonad
-- [x] Write the documenet
-
