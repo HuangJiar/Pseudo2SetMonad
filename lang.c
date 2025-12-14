@@ -328,6 +328,7 @@ static int cmd_is_noop(const struct cmd *c);
 
 static int var_list_length(const struct var_list *vars);
 static void pp_state_type(const struct var_list *vars);
+static void pp_state_type_nonunit(const struct var_list *vars);
 static void pp_state_pattern(const struct var_list *vars);
 static void pp_state_tuple(const struct var_list *vars);
 static void pp_cmd_loop_body(struct cmd *c, int indent, const struct var_list *vars);
@@ -344,19 +345,30 @@ static int var_list_length(const struct var_list *vars) {
   return n;
 }
 
+static void pp_state_type_nonunit(const struct var_list *vars) {
+  if (vars == NULL) {
+    return;
+  }
+  printf("Z");
+  if (vars->next == NULL) {
+    return;
+  }
+  printf(" * ");
+  if (vars->next->next != NULL) {
+    putchar('(');
+    pp_state_type_nonunit(vars->next);
+    putchar(')');
+  } else {
+    pp_state_type_nonunit(vars->next);
+  }
+}
+
 static void pp_state_type(const struct var_list *vars) {
-  int n = var_list_length(vars);
-  if (n <= 0) {
+  if (vars == NULL) {
     printf("unit");
     return;
   }
-  for (int i = 0; i < n; i++) {
-    if (i == 0) {
-      printf("Z");
-    } else {
-      printf(" * Z");
-    }
-  }
+  pp_state_type_nonunit(vars);
 }
 
 static void pp_state_pattern_rec(const struct var_list *vars) {
@@ -526,14 +538,14 @@ static void pp_cmd_expr_inner(struct cmd *c, int indent, int is_tail) {
     break;
   case T_ASGN:
     if (c->d.ASGN.left != NULL && c->d.ASGN.left->t == T_VAR) {
-      printf("%s <- ", c->d.ASGN.left->d.VAR.name);
+      printf("%s <- ret (", c->d.ASGN.left->d.VAR.name);
       pp_expr(c->d.ASGN.right);
-      printf(";;");
+      printf(");;");
     } else {
       pp_expr(c->d.ASGN.left);
-      printf(" <- ");
+      printf(" <- ret (");
       pp_expr(c->d.ASGN.right);
-      printf(";;");
+      printf(");;");
     }
     if (is_tail) {
       pp_newline(indent);
@@ -584,9 +596,8 @@ static void pp_cmd_expr_inner(struct cmd *c, int indent, int is_tail) {
     }
     break;
   case T_SKIP:
-    printf("ret tt");
-    if (!is_tail) {
-      printf(";;");
+    if (is_tail) {
+      printf("ret tt");
     }
     break;
   case T_LOOP: {
@@ -672,14 +683,14 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     break;
   case T_ASGN:
     if (c->d.ASGN.left != NULL && c->d.ASGN.left->t == T_VAR) {
-      printf("%s <- ", c->d.ASGN.left->d.VAR.name);
+      printf("%s <- ret (", c->d.ASGN.left->d.VAR.name);
       pp_expr(c->d.ASGN.right);
-      printf(";;");
+      printf(");;");
     } else {
       pp_expr(c->d.ASGN.left);
-      printf(" <- ");
+      printf(" <- ret (");
       pp_expr(c->d.ASGN.right);
-      printf(";;");
+      printf(");;");
     }
     break;
   case T_SEQ:
@@ -719,9 +730,6 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     pp_state_tuple(vars);
     return;
   case T_SKIP:
-    if (!is_tail) {
-      printf("ret tt");
-    }
     break;
   case T_LOOP:
     /* Nested loop inside loop body is a statement; sequence it. */
