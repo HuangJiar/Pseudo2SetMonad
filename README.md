@@ -218,6 +218,10 @@ The commands enclosed in a pair of braces is regarded as a command block.
 
   We will not check whether `break` or `continue` is used outside a loop.(In that case the result Coq code can not be properly parsed by Coq) We assume that the input pseudo code is valid.
 
+  ###### More examples
+
+  The result of example1-6.p are verified in `test.v`. example7.p is an example of illegel pseudo code.
+
 ### How to run
 
  ```
