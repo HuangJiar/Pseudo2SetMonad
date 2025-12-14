@@ -94,6 +94,13 @@ struct cmd * TSeq(struct cmd * left, struct cmd * right) {
     left->d.IF.right = TSeq(if_right, right);
     return left;
   }
+  if (left->t == T_SEQ && left->d.SEQ.right->t == T_IF) {
+    struct cmd *if_left = left->d.SEQ.right->d.IF.left,
+               *if_right = left->d.SEQ.right->d.IF.right;
+    left->d.SEQ.right->d.IF.left = TSeq(if_left, right);
+    left->d.SEQ.right->d.IF.right = TSeq(if_right, right);
+    return left;
+  }
   res -> d.SEQ.left = left;
   res -> d.SEQ.right = right;
   return res;
