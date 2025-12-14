@@ -87,6 +87,13 @@ struct cmd * TAsgn(struct expr * left, struct expr * right) {
 struct cmd * TSeq(struct cmd * left, struct cmd * right) {
   struct cmd * res = new_cmd_ptr();
   res -> t = T_SEQ;
+  if (left->t == T_IF) {
+    struct cmd *if_left = left->d.IF.left,
+               *if_right = left->d.IF.right;
+    left->d.IF.left = TSeq(if_left, right);
+    left->d.IF.right = TSeq(if_right, right);
+    return left;
+  }
   res -> d.SEQ.left = left;
   res -> d.SEQ.right = right;
   return res;

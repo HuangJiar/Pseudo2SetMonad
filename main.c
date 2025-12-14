@@ -4,6 +4,7 @@
 #include "lang.h"
 #include "lexer.h"
 #include "parser.h"
+#include <unistd.h>
 
 extern struct cmd * root;
 int yyparse();
@@ -130,13 +131,24 @@ char* process_indentation(FILE* input) {
     return output;
 }
 
+int verbose = 0;
+
 int main(int argc, char **argv) {
     // 处理缩进，将缩进转换为花括号
     char* processed_input = process_indentation(stdin);
     fclose(stdin);
+
+    int opt;
+    while ((opt = getopt(argc, argv, "V")) != -1) {
+        switch (opt){
+            case 'V':
+                verbose = 1;
+        }
+    }
     
     // 调试：输出处理后的代码
-    fprintf(stderr, "===== Processed Input =====\n%s\n===== End =====\n", processed_input);
+    if (verbose)
+        fprintf(stderr, "===== Processed Input =====\n%s\n===== End =====\n", processed_input);
     
     // 将处理后的字符串写入临时文件
     FILE* temp = tmpfile();
@@ -145,7 +157,6 @@ int main(int argc, char **argv) {
         free(processed_input);
         return 1;
     }
-    
     fprintf(temp, "%s", processed_input);
     free(processed_input);
     rewind(temp);

@@ -34,11 +34,11 @@ The commands enclosed in a pair of braces is regarded as a command block.
 
 - break, continue, skip
 - Assignment: [expr] <- [expr]
-  e.g. a <- 1
+  e.g. `a <- 1`
 - Declaration: Var [var_name]
-  e.g. Var a
+  e.g. `Var a`
 - Expression: [expr]
-  e.g. cmp(a1, a2)
+  e.g. `cmp(a1, a2)`
 
 ###### Blocked Commands
 
@@ -161,7 +161,7 @@ The commands enclosed in a pair of braces is regarded as a command block.
     _ <- cmp a1 a2;;
     ret tt.
   ```
-  A series of possible definition of `average`,`cmp`,`S1`,`S2`:
+  A possible series of definition of `average`,`cmp`,`S1`,`S2`:
   ```
   Fixpoint sum(L: list Z) : SetMonad.M Z := 
   match L with
@@ -180,6 +180,17 @@ The commands enclosed in a pair of braces is regarded as a command block.
   Definition cmp: Z -> Z -> SetMonad.M Z :=
     fun x y => ret(1).
   ```
+
+  Although the above example shows that Coq program with `list Z` can also fit with the code we generate, we recommand that you only use this program to translate psedue code only involving `Z` to Coq program.
+
+### How to run
+
+ ```
+ make
+ ./main < [code file]
+ ```
+ 
+ If you want to see the code generated after adding braces, you can add parameter `-V`. Then the code will be printed to `stderr`.
 
 
 TO DO LIST.
