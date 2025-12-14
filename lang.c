@@ -310,12 +310,17 @@ static void free_loops(void) {
 static void pp_expr(struct expr *e);
 static void pp_cmd_expr_inner(struct cmd *c, int indent, int is_tail);
 static void pp_cmd_expr(struct cmd *c, int indent);
+static int cmd_is_noop(const struct cmd *c);
 
 static int var_list_length(const struct var_list *vars);
 static void pp_state_type(const struct var_list *vars);
 static void pp_state_pattern(const struct var_list *vars);
 static void pp_state_tuple(const struct var_list *vars);
 static void pp_cmd_loop_body(struct cmd *c, int indent, const struct var_list *vars);
+
+static int cmd_is_noop(const struct cmd *c) {
+  return (c == NULL) || (c->t == T_SKIP);
+}
 
 static int var_list_length(const struct var_list *vars) {
   int n = 0;
@@ -533,16 +538,20 @@ static void pp_cmd_expr_inner(struct cmd *c, int indent, int is_tail) {
     printf("assume (");
     pp_expr(c->d.IF.cond);
     printf(");;");
-    pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_expr_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, 1);
+    if (!cmd_is_noop(c->d.IF.left)) {
+      pp_newline(indent + 2 * PP_INDENT_UNIT);
+      pp_cmd_expr_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, 1);
+    }
     putchar(')');
     pp_newline(indent + PP_INDENT_UNIT);
     putchar('(');
     printf("assume (~ ");
     pp_expr(c->d.IF.cond);
     printf(");;");
-    pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_expr_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, 1);
+    if (!cmd_is_noop(c->d.IF.right)) {
+      pp_newline(indent + 2 * PP_INDENT_UNIT);
+      pp_cmd_expr_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, 1);
+    }
     putchar(')');
     if (!is_tail) {
       printf(";;");
@@ -639,8 +648,6 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     if (is_tail) {
       printf("continue ");
       pp_state_tuple(vars);
-    } else {
-      printf("ret tt");
     }
     return;
   }
@@ -673,16 +680,20 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     printf("assume (");
     pp_expr(c->d.IF.cond);
     printf(");;");
-    pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_loop_body_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, vars, is_tail);
+    if (!cmd_is_noop(c->d.IF.left)) {
+      pp_newline(indent + 2 * PP_INDENT_UNIT);
+      pp_cmd_loop_body_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, vars, is_tail);
+    }
     putchar(')');
     pp_newline(indent + PP_INDENT_UNIT);
     putchar('(');
     printf("assume (~ ");
     pp_expr(c->d.IF.cond);
     printf(");;");
-    pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_loop_body_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, vars, is_tail);
+    if (!cmd_is_noop(c->d.IF.right)) {
+      pp_newline(indent + 2 * PP_INDENT_UNIT);
+      pp_cmd_loop_body_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, vars, is_tail);
+    }
     putchar(')');
     return;
   case T_CONTINUE:
@@ -694,7 +705,9 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     pp_state_tuple(vars);
     return;
   case T_SKIP:
-    printf("ret tt");
+    if (!is_tail) {
+      printf("ret tt");
+    }
     break;
   case T_LOOP:
     /* Nested loop inside loop body is a statement; sequence it. */
