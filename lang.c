@@ -101,6 +101,10 @@ struct cmd * TSeq(struct cmd * left, struct cmd * right) {
     left->d.SEQ.right->d.IF.right = TSeq(if_right, right);
     return left;
   }
+  if (left->t == T_CONTINUE || left->t == T_BREAK || right->t == T_SKIP)
+    return left;
+  if (left->t == T_SKIP)
+    return right;
   res -> d.SEQ.left = left;
   res -> d.SEQ.right = right;
   return res;
