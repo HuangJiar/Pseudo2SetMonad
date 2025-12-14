@@ -24,7 +24,6 @@ The commands enclosed in a pair of braces is regarded as a command block.
 
  Very similar to that of C, with the same priority.
 
- **Note: If not specially mentioned, we need the functions appearing in expressions be of type `T1->T2->...->Z`.**
 
 #### Commands
 
@@ -39,9 +38,9 @@ The commands enclosed in a pair of braces is regarded as a command block.
   e.g. `a <- 1`
 - Declaration: Var [var_name]
   e.g. `Var a`
-- Expression: [expr]
+- Function expression: [expr_fun]
   e.g. `cmp(a1, a2)`
-  **Note: Due to the grammer of Coq and our implementation. Now only [expr] with type of function is properly supported.Furthermore, we need to ensure that the function is defined of type `T1->T2->...->SetMonad.M Z` to make sure that our Coq code works.We assume the function does not change the value of variables.**
+  Note: expr of other types can be parsed properly, but can not be translated to Coq program properly. e.g. `1+1;;`
 
 ###### Blocked Commands
 
@@ -145,7 +144,7 @@ The commands enclosed in a pair of braces is regarded as a command block.
 
 ### Translating to Coq Program
 
-  <!-- We assume that all functions that are used as a single command (e.g. `cmp(a1, a2)`) or are used in arithmatic calculations (e.g. `fib(n1)+fib(n2)`) are of the type `T1 -> T2 -> ... -> Tn -> SetMonad.M Z`, where `n` is the number of variables. -->
+  We assume that all functions that are used as a single command (e.g. `cmp(a1, a2)`) are of the type `T1 -> T2 -> ... -> Tn -> SetMonad.M Z`, where `n` is the number of variables. And all functions that are used in arithmatic calculations (e.g. `fib(n1)+fib(n2)`), are of the type `T1 -> T2 -> ... -> Tn -> Z`. Such assumption is for convenience. We further assume that the function does not change the value of variables. (We are not sure whether we need to support that)
 
   We assume that our program have name `main`, which is of type SetMonad.unit. First let's take a look at a simple example.
 
