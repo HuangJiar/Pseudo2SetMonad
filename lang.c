@@ -674,7 +674,7 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     pp_expr(c->d.IF.cond);
     printf(");;");
     pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_loop_body_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, vars, 1);
+    pp_cmd_loop_body_inner(c->d.IF.left, indent + 2 * PP_INDENT_UNIT, vars, is_tail);
     putchar(')');
     pp_newline(indent + PP_INDENT_UNIT);
     putchar('(');
@@ -682,7 +682,7 @@ static void pp_cmd_loop_body_inner(struct cmd *c, int indent, const struct var_l
     pp_expr(c->d.IF.cond);
     printf(");;");
     pp_newline(indent + 2 * PP_INDENT_UNIT);
-    pp_cmd_loop_body_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, vars, 1);
+    pp_cmd_loop_body_inner(c->d.IF.right, indent + 2 * PP_INDENT_UNIT, vars, is_tail);
     putchar(')');
     return;
   case T_CONTINUE:
