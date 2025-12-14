@@ -50,6 +50,10 @@
 
 [_A-Za-z][_A-Za-z0-9]* {
     yylval.i = new_str(yytext, yyleng);
+    if (yylval.i[0] == '_' && yylval.i[1] == '\0') {
+        fprintf(stderr, "Illigal identity \'_\'\n");
+        exit(0);
+    }
     return TM_IDENT;
 }
 

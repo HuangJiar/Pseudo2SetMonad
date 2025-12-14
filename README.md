@@ -6,8 +6,9 @@ This is the repo of the programming project of CS2205-2025Fall in SJTU.
 - Assignment <-
 - Spacer ( ) : ;; , { }
 - Natural Number 0|[1-9][0-9]*
-- Identity [_A-Za-z][_A-Za-z0-9]*
-- Reserved Words if else loop_init loop_body continue break skip true false
+- Identity [_A-Za-z][_A-Za-z0-9]*  
+  **Note: We additionally require that the identity can not be '\_'.**
+- Reserved Words if else loop_init loop_body continue break skip true false _
 
 ### Grammar:
 
@@ -139,6 +140,46 @@ The commands enclosed in a pair of braces is regarded as a command block.
   ```
 - We have not supported comments in the code. all `//`-style comments in the above examples are just for convinience. They can not be recognized or paresed (and result in "syntax error").
 
+### Translating to Coq Program
+
+  We assume that all functions that are used as a single command (e.g. `cmp(a1, a2)`) or are used in arithmatic calculations (e.g. `fib(n1)+fib(n2)`) are of the type `T1 -> T2 -> ... -> Tn -> SetMonad.M Z`, where `n` is the number of variables.
+
+  We assume that our program have name `main`, which is of type SetMonad.unit.
+
+  example:
+  initial psedue code:
+  ```
+  a1 <- average(S1);;
+  a2 <- average(S2);;
+  cmp(a1, a2)
+  ```
+  Our translation:
+  ```
+  Definition main : SetMonad.M unit :=
+    a1 <- average S1;;
+    a2 <- average S2;;
+    _ <- cmp a1 a2;;
+    ret tt.
+  ```
+  A series of possible definition of `average`,`cmp`,`S1`,`S2`:
+  ```
+  Fixpoint sum(L: list Z) : SetMonad.M Z := 
+  match L with
+  | nil => ret 0
+  | a :: L1 =>
+      x <- sum(L1);;
+      ret (x+a)
+  end.
+
+  Definition average(L: list Z): SetMonad.M Z :=
+    x <- sum L ;; y <- ret(Z.of_nat (length L)) ;; ret (x/y).
+
+  Definition S1 : list Z := 1::2::nil.
+  Definition S2 : list Z := 4::nil.
+
+  Definition cmp: Z -> Z -> SetMonad.M Z :=
+    fun x y => ret(1).
+  ```
 
 
 TO DO LIST.
